@@ -121,30 +121,21 @@ class AddEditItemViewController: UIViewController {
             present(alert, animated: true)
             return
         }
-        
         let data: [String: Any] = ["name": name, "widthMm": width, "heightMm": height]
         let roomRef = db.collection("houses").document(house.id).collection("rooms").document(room.id)
-        
         if isWindow {
             if let w = window {
-                roomRef.collection("windows").document(w.id).updateData(data) { _ in
-                    self.navigationController?.popViewController(animated: true)
-                }
+                roomRef.collection("windows").document(w.id).updateData(data)
             } else {
-                roomRef.collection("windows").addDocument(data: data) { _ in
-                    self.navigationController?.popViewController(animated: true)
-                }
+                roomRef.collection("windows").addDocument(data: data)
             }
         } else {
             if let f = floorSpace {
-                roomRef.collection("floorSpaces").document(f.id).updateData(data) { _ in
-                    self.navigationController?.popViewController(animated: true)
-                }
+                roomRef.collection("floorSpaces").document(f.id).updateData(data)
             } else {
-                roomRef.collection("floorSpaces").addDocument(data: data) { _ in
-                    self.navigationController?.popViewController(animated: true)
-                }
+                roomRef.collection("floorSpaces").addDocument(data: data)
             }
         }
+        navigationController?.popViewController(animated: true)
     }
 }

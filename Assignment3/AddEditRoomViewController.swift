@@ -88,7 +88,6 @@ class AddEditRoomViewController: UIViewController {
         ])
     }
     
-    // MARK: - Save
     @objc func saveTapped() {
         guard let name = nameField.text, !name.isEmpty,
               let labourText = labourCostField.text,
@@ -98,24 +97,13 @@ class AddEditRoomViewController: UIViewController {
             present(alert, animated: true)
             return
         }
-        
-        let data: [String: Any] = [
-            "name": name,
-            "labourCost": labourCost
-        ]
-        
+        let data: [String: Any] = ["name": name, "labourCost": labourCost]
         let roomsRef = db.collection("houses").document(house.id).collection("rooms")
-        
         if let room = room {
-            roomsRef.document(room.id).updateData(data) { error in
-                if let error = error { print("Error: \(error)") }
-                else { self.navigationController?.popViewController(animated: true) }
-            }
+            roomsRef.document(room.id).updateData(data)
         } else {
-            roomsRef.addDocument(data: data) { error in
-                if let error = error { print("Error: \(error)") }
-                else { self.navigationController?.popViewController(animated: true) }
-            }
+            roomsRef.addDocument(data: data)
         }
+        navigationController?.popViewController(animated: true)
     }
 }

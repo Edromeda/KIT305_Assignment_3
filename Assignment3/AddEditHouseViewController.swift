@@ -86,7 +86,6 @@ class AddEditHouseViewController: UIViewController {
         ])
     }
     
-    // MARK: - Save
     @objc func saveTapped() {
         guard let customerName = customerNameField.text, !customerName.isEmpty,
               let address = addressField.text, !address.isEmpty else {
@@ -95,30 +94,12 @@ class AddEditHouseViewController: UIViewController {
             present(alert, animated: true)
             return
         }
-        
-        let data: [String: Any] = [
-            "customerName": customerName,
-            "address": address
-        ]
-        
+        let data: [String: Any] = ["customerName": customerName, "address": address]
         if let house = house {
-            // Editing existing house
-            db.collection("houses").document(house.id).updateData(data) { error in
-                if let error = error {
-                    print("Error updating: \(error)")
-                } else {
-                    self.navigationController?.popViewController(animated: true)
-                }
-            }
+            db.collection("houses").document(house.id).updateData(data)
         } else {
-            // Adding new house
-            db.collection("houses").addDocument(data: data) { error in
-                if let error = error {
-                    print("Error adding: \(error)")
-                } else {
-                    self.navigationController?.popViewController(animated: true)
-                }
-            }
+            db.collection("houses").addDocument(data: data)
         }
+        navigationController?.popViewController(animated: true)
     }
 }

@@ -4,8 +4,6 @@
 //
 //  Created by Chris Edrom Luchavez on 22/5/2026.
 //
-
-
 import UIKit
 import FirebaseFirestore
 
@@ -17,6 +15,9 @@ class AddEditItemViewController: UIViewController {
     var floorSpace: FloorSpace?
     var isWindow: Bool
     let db = Firestore.firestore()
+    
+    var selectedProduct: Product?
+    var selectedVariant: String?
     
     let nameField: UITextField = {
         let tf = UITextField()
@@ -42,6 +43,16 @@ class AddEditItemViewController: UIViewController {
         tf.keyboardType = .decimalPad
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
+    }()
+    
+    let productButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("Select Product (optional)", for: .normal)
+        btn.backgroundColor = .systemGray5
+        btn.setTitleColor(.systemBlue, for: .normal)
+        btn.layer.cornerRadius = 8
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
     }()
     
     let saveButton: UIButton = {
@@ -74,12 +85,19 @@ class AddEditItemViewController: UIViewController {
             nameField.text = w.name
             widthField.text = String(w.widthMm)
             heightField.text = String(w.heightMm)
+            if let pName = w.productName, let variant = w.selectedVariant {
+                productButton.setTitle("\(pName) - \(variant)", for: .normal)
+            }
         } else if let f = floorSpace {
             nameField.text = f.name
             widthField.text = String(f.widthMm)
             heightField.text = String(f.heightMm)
+            if let pName = f.productName, let variant = f.selectedVariant {
+                productButton.setTitle("\(pName) - \(variant)", for: .normal)
+            }
         }
         
+        productButton.addTarget(self, action: #selector(selectProductTapped), for: .touchUpInside)
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
     }
     
@@ -87,6 +105,7 @@ class AddEditItemViewController: UIViewController {
         view.addSubview(nameField)
         view.addSubview(widthField)
         view.addSubview(heightField)
+        view.addSubview(productButton)
         view.addSubview(saveButton)
         
         NSLayoutConstraint.activate([
@@ -105,11 +124,27 @@ class AddEditItemViewController: UIViewController {
             heightField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             heightField.heightAnchor.constraint(equalToConstant: 44),
             
-            saveButton.topAnchor.constraint(equalTo: heightField.bottomAnchor, constant: 30),
+            productButton.topAnchor.constraint(equalTo: heightField.bottomAnchor, constant: 16),
+            productButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            productButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            productButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            saveButton.topAnchor.constraint(equalTo: productButton.bottomAnchor, constant: 16),
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             saveButton.heightAnchor.constraint(equalToConstant: 44)
         ])
+    }
+    
+    @objc func selectProductTapped() {
+        let category = isWindow ? "window" : "floor"
+        let vc = ProductPickerViewController(category: category)
+        vc.onProductSelected = { product, variant in
+            self.selectedProduct = product
+            self.selectedVariant = variant
+            self.productButton.setTitle("\(product.name) - \(variant)", for: .normal)
+        }
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc func saveTapped() {
@@ -121,7 +156,26 @@ class AddEditItemViewController: UIViewController {
             present(alert, animated: true)
             return
         }
-        let data: [String: Any] = ["name": name, "widthMm": width, "heightMm": height]
+        
+        var data: [String: Any] = ["name": name, "widthMm": width, "heightMm": height]
+        
+        if let product = selectedProduct, let variant = selectedVariant {
+            data["productId"] = product.id
+            data["productName"] = product.name
+            data["productPricePerSqm"] = product.pricePerSqm
+            data["selectedVariant"] = variant
+        } else if let w = window {
+            if let pid = w.productId { data["productId"] = pid }
+            if let pname = w.productName { data["productName"] = pname }
+            if let pprice = w.productPricePerSqm { data["productPricePerSqm"] = pprice }
+            if let pvariant = w.selectedVariant { data["selectedVariant"] = pvariant }
+        } else if let f = floorSpace {
+            if let pid = f.productId { data["productId"] = pid }
+            if let pname = f.productName { data["productName"] = pname }
+            if let pprice = f.productPricePerSqm { data["productPricePerSqm"] = pprice }
+            if let pvariant = f.selectedVariant { data["selectedVariant"] = pvariant }
+        }
+        
         let roomRef = db.collection("houses").document(house.id).collection("rooms").document(room.id)
         if isWindow {
             if let w = window {

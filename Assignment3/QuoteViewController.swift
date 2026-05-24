@@ -72,8 +72,8 @@ class QuoteViewController: UITableViewController {
     }
     
     func roomTotal(for room: Room) -> Double {
-        let windowCost = (windowsByRoom[room.id] ?? []).reduce(0.0) { $0 + $1.areaSqm * windowRate }
-        let floorCost = (floorSpacesByRoom[room.id] ?? []).reduce(0.0) { $0 + $1.areaSqm * floorRate }
+        let windowCost = (windowsByRoom[room.id] ?? []).reduce(0.0) { $0 + $1.areaSqm * $1.effectiveRate }
+        let floorCost = (floorSpacesByRoom[room.id] ?? []).reduce(0.0) { $0 + $1.areaSqm * $1.effectiveRate }
         return windowCost + floorCost + room.labourCost
     }
     
@@ -115,12 +115,14 @@ class QuoteViewController: UITableViewController {
             
             if indexPath.row < windows.count {
                 let w = windows[indexPath.row]
-                cell?.textLabel?.text = "Window: \(w.name)"
-                cell?.detailTextLabel?.text = String(format: "$%.2f", w.areaSqm * windowRate)
+                let productLabel = w.productName != nil ? " (\(w.productName!))" : ""
+                cell?.textLabel?.text = "Window: \(w.name)\(productLabel)"
+                cell?.detailTextLabel?.text = String(format: "$%.2f", w.areaSqm * w.effectiveRate)
             } else if indexPath.row < windows.count + floors.count {
                 let f = floors[indexPath.row - windows.count]
-                cell?.textLabel?.text = "Floor: \(f.name)"
-                cell?.detailTextLabel?.text = String(format: "$%.2f", f.areaSqm * floorRate)
+                let productLabel = f.productName != nil ? " (\(f.productName!))" : ""
+                cell?.textLabel?.text = "Floor: \(f.name)\(productLabel)"
+                cell?.detailTextLabel?.text = String(format: "$%.2f", f.areaSqm * f.effectiveRate)
             } else {
                 cell?.textLabel?.text = "Labour"
                 cell?.detailTextLabel?.text = String(format: "$%.2f", room.labourCost)
@@ -141,10 +143,10 @@ class QuoteViewController: UITableViewController {
         for room in rooms {
             text += "Room: \(room.name)\n"
             for w in windowsByRoom[room.id] ?? [] {
-                text += "  Window - \(w.name): \(String(format: "$%.2f", w.areaSqm * windowRate))\n"
+                text += "  Window - \(w.name): \(String(format: "$%.2f", w.areaSqm * w.effectiveRate))\n"
             }
             for f in floorSpacesByRoom[room.id] ?? [] {
-                text += "  Floor - \(f.name): \(String(format: "$%.2f", f.areaSqm * floorRate))\n"
+                text += "  Floor - \(f.name): \(String(format: "$%.2f", f.areaSqm * f.effectiveRate))\n"
             }
             text += "  Labour: \(String(format: "$%.2f", room.labourCost))\n"
             text += "  Room Total: \(String(format: "$%.2f", roomTotal(for: room)))\n\n"

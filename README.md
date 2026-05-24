@@ -21,8 +21,7 @@ Iphone 17 pro Emulation
 **QuoteViewController** - Displays an itemised quote for the total of a house.
 
 ## References
-- Firebase iOS SDK documentation: 
-- KIT305 Tutorial work (9, 10 and 11)
+- Firebase 
 
 ##AI Acknowledgement
 This work made use of Claude by Anthropic(Claude.ai) to assist with coding. Prompts included efficient code structure, firebase integration issues and app layout designing. All generation was reviewed beforehand.

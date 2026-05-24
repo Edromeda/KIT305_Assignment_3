@@ -1,9 +1,9 @@
 # KIT305_Assignment_3
 
-##Target Device
+## Target Device
 Iphone 17 pro Emulation
 
-##View Controllers
+## View Controllers
 **HouseListViewController** - The main screen, displays houses.
 
 **AddEditHouseViewController** - Screen for adding or editing a house and saves them on Firebase.
@@ -23,5 +23,5 @@ Iphone 17 pro Emulation
 ## References
 - Firebase 
 
-##AI Acknowledgement
+## AI Acknowledgement
 This work made use of Claude by Anthropic(Claude.ai) to assist with coding. Prompts included efficient code structure, firebase integration issues and app layout designing. All generation was reviewed beforehand.
